@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zyt.mapper.EmpMapper">
+
+    <!--进行映射-->
+    <resultMap id="empMap" type="Emp">
+        <!--id代表是主键-->
+        <id column="emp_id" property="empId"/>
+        <!--result就是其中的属性-->
+        <result column="name" property="name"/>
+        <result column="sex" property="sex"/>
+        <result column="age" property="age"/>
+        <result column="sal" property="sal"/>
+        <result column="birthday" property="birthday"/>
+        <result column="address" property="address"/>
+        <result column="dept_id" property="deptId"/>
+        <association property="dept" column="dept_id" javaType="Dept">
+            <id column="dept_id" property="deptId"/>
+            <result column="dept_name" property="deptName"/>
+        </association>
+    </resultMap>
+
+
+    <!--type-aliases-package   没有把EmpQuery所在包放到别名包里 所以需要 要放入全路径名-->
+    <select id="getEmpList" parameterType="cn.zyt.vo.EmpQuery" resultMap="empMap">
+        select * from emp a left join dept b on a.dept_id = b.dept_id
+        <include refid="getEmpListWhere"></include>
+        order by emp_id desc
+        limit #{start},#{limit}
+    </select>
+
+    <!--统计查询员工数量-->
+    <select id="countEmpList" parameterType="cn.zyt.vo.EmpQuery" resultType="Long">
+        select count(1) from emp a
+        <include refid="getEmpListWhere"></include>
+    </select>
+
+    <sql id="getEmpListWhere">
+        <where>
+            <if test="name != null">
+                a.name like '%' #{name} '%'
+            </if>
+            <if test="startDate != null">
+                /*因为之后判断时间要用到大于号小于号  这在xml里面是cdata 要引入*/
+                <![CDATA[
+                and a.birthday >= #{startDate}
+                ]]>
+            </if>
+            <if test="endDate != null">
+                /*因为之后判断时间要用到大于号小于号  这在xml里面是cdata 要引入*/
+                <![CDATA[
+                and a.birthday <= #{endDate}
+                ]]>
+            </if>
+        </where>
+    </sql>
+
+    <insert id="addEmp" parameterType="Emp">
+        insert into emp
+        (name,age,sex,sal,birthday,address,dept_id)
+        values
+        (#{name},#{age},#{sex},#{sal},#{birthday},#{address},#{deptId})
+    </insert>
+
+    <!--删除员工   这个语句 就是类似 name in ('a','b')这样 -->
+    <delete id="deleteEmpByIds" parameterType="String">
+        delete from emp where emp_id in (${ids})
+    </delete>
+
+    <!--查询员工-->
+    <select id="getEmpById" parameterType="Integer" resultType="Emp">
+        select * from emp where emp_id = #{id}
+    </select>
+
+    <!--修改员工信息-->
+    <update id="updateEmp" parameterType="Emp">
+        update emp
+        set name = #{name},
+            sex = #{sex},
+            sal = #{sal},
+            age = #{age},
+            birthday = #{birthday},
+            address = #{address}
+        where emp_id = #{empId}
+    </update>
+</mapper>

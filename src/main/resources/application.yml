@@ -1,0 +1,32 @@
+server:
+  port: 9981
+
+
+spring:
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql://localhost:3306/laydb?characterEncoding=utf8&serverTimezone=GMT%2B8
+
+  #必须设置为false不然前端改了一个页面就必须要重启
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+  #这个是必须要开的 因为页面只能提交get和post请求  当你需要提交delete或者其他请求 就需要转换
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+    throw-exception-if-no-handler-found: true
+
+  jackson:
+    date-format: yyyy-MM-dd
+    time-zone: GMT+8
+
+mybatis:
+  type-aliases-package: cn.zyt.entity
+  configuration:
+    map-underscore-to-camel-case: true #驼峰转换
+logging:
+  level:
+    cn.zyt: debug

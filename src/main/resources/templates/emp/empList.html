@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" th:href="@{/css/layui.css}" media="all">
+    <link rel="stylesheet" th:href="@{/css/layuimini.css?v=2.0.4.2}" media="all">
+    <link rel="stylesheet" th:href="@{/css/themes/default.css}" media="all">
+    <link rel="stylesheet" th:href="@{/lib/font-awesome-4.7.0/css/font-awesome.min.css}" media="all">
+    <style>
+        .div-content
+        {
+            background-color: #c1d5eb;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .table-search-fieldset
+        {
+            margin: 0;
+            border: 1px solid #e6e6e6;
+            padding: 10px 20px 5px 20px;
+            color: #6b6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="div-content">
+        <form class="layui-form layui-form-pane" id="form-search" >
+        <fieldset class="table-search-fieldset">
+            <legend>搜索条件</legend>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">校友姓名</label>
+                    <div class="layui-input-inline" style="width: 150px;">
+                        <input type="text" name="name" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">在校时间</label>
+                    <div class="layui-input-inline" style="width: 120px;">
+                        <input type="text" name="startDate" placeholder="入学时间" autocomplete="off" class="layui-input date">
+                    </div>
+                    <div class="layui-form-mid">-</div>
+                    <div class="layui-input-inline" style="width: 120px;">
+                        <input type="text" name="endDate" placeholder="毕业时间" autocomplete="off" class="layui-input date">
+                    </div>
+                </div>
+                <!--查询按钮-->
+                <div class="layui-inline">
+                    <button id="btn-search" lay-submit lay-filter="btn-search-filter" type="button" class="layui-btn layui-btn-radius layui-btn-normal">
+                        <i class="layui-icon layui-icon-search"></i>
+                        查询
+                    </button>
+                    <!--type=reset就会清空表单里已经填写的记录-->
+                    <button id="btn-reset" type="reset" class="layui-btn layui-btn-radius layui-btn-warm">
+                        <i class="layui-icon layui-icon-fonts-clear"></i>
+                        清空条件
+                    </button>
+                </div>
+            </div>
+        </fieldset>
+        </form>
+        <table id="table-emp" lay-filter="table-emp-filter"></table>
+    </div>
+
+    <!--部门转换-->
+    <script type="text/html" id="convertDept">
+        {{#
+        return d.dept.deptName;
+        }}
+    </script>
+
+    <!--就是工具栏的-->
+    <script type="text/html" id="table-emp-toolbar">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-sm" lay-event="add">新增</button>
+            <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</button>
+        </div>
+    </script>
+
+    <script type="text/html" id="convertSex">
+        {{#
+            if(d.sex=='M')
+            {
+                return '男';
+            }else if(d.sex=='F')
+            {
+                return '女';
+            }else
+            {
+                return '妖';
+            }
+        }}
+    </script>
+
+    <script type="text/html" id="col-emp-toolbar">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>
+
+    <script th:src="@{/layui.js}" charset="utf-8"></script>
+    <script th:src="@{webjars/jquery/3.5.1/jquery.min.js}" charset="utf-8"></script>
+    <script th:inline="javascript">
+
+        /*进行刷新的函数*/
+        function refreshTable()
+        {
+            $("#btn-reset").click();
+            $("#btn-search").click();
+        }
+
+        var ctxPath = [[@{/}]];
+        /*组件都是放在这边*/
+        layui.use(['laydate','table','form'], function(){
+            var laydate = layui.laydate;
+            var table = layui.table;
+            var form = layui.form;
+
+            /*监听表格头部工具栏的事件*/
+            table.on('toolbar(table-emp-filter)', function(obj){
+                if (obj.event =='add')
+                {
+                    layer.open({
+                        type: 2,
+                        title: '新增校友',
+                        area: ['100%','100%'],
+                        content: ctxPath+'emp/add/ui' //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['http://sentsin.com', 'no']
+                    });
+                }else if (obj.event == 'delete') {
+                    var checkStatus = table.checkStatus('table-emp'); //table-emp 即为基础参数 id 对应的值  就是选中表格的id
+                    //如果没有选中任何数据
+                    if (checkStatus.data.length == 0) {
+                        layer.alert('您没有选中任何数据', {icon: 2, anim: 6, title: "警告"});
+                        return false;
+                    }
+                    // 选中的id
+                    var idArr = new Array();
+                    // 遍历data获得id
+                    $(checkStatus.data).each(function () {
+                        idArr.push(this.empId);
+                    });
+
+                    //进行询问确认
+                    layer.confirm('您确认删除选中记录?', {icon:3,title:'删除确认'}, function (index) {
+                        //异步请求删除数据，结果提示，刷新表格
+                        var url = ctxPath + "emp/"+idArr.join(",");
+                        var param = {
+                            _method:"DELETE"
+                        }
+                        $.post(url,param,function(response) {
+                            //成功提示
+                            if (response.code==0){
+                                layer.msg(response.message,{icon: 1,title:"操作结果"})
+                                refreshTable();
+                            }else {
+                                layer.alert(response.message,{icon:2,anim:6});
+                            }
+                        });
+                        layer.close(index);
+                    })
+
+
+
+                }
+            });
+
+            //执行一个laydate实例
+            laydate.render({
+                elem: '.date' //指定元素
+            });
+
+            //校友列表表格
+            table.render({
+                elem: '#table-emp'
+                ,url: ctxPath + 'emp/list' //数据接口
+                ,limits: [5,10,30,50,100]
+                ,page: true //开启分页
+                ,toolbar: "#table-emp-toolbar"
+                ,cols: [[ //表头
+                    {type: "checkbox",width: 60}
+                    ,{field: 'empId', title: '员工编号', width:120, sort: true,align: 'center'}
+                    ,{field: 'name', title: '用户名', width:140,align: 'center'}
+                    ,{field: 'sex', title: '性别', width:80, sort: true,align: 'center',templet: '#convertSex'}
+                    ,{field: 'age', title: '年龄', width:80,align: 'center'}
+                    ,{field: 'sal', title: '工资', width: 120,align: 'right'}
+                    ,{field: 'dept', title: '部门编号', width: 140, sort: true,align: 'center',templet: '#convertDept'}
+                    ,{field: 'birthday', title: '生日', width: 120, sort: true,align: 'center'}
+                    ,{field: 'address', title: '家庭住址'}
+                    ,{title: '操作', width: 150,toolbar:'#col-emp-toolbar'}
+                ]]
+            });
+
+            //监听表单提交
+            form.on('submit(btn-search-filter)', function(data){
+                console.log(data.field) //当前容器的全部表单字段，名值对形式：{name: value}
+                //接下来就是去刷新表格  可以用jquery发异步请求  也可以用框架里自带的刷新方法
+                table.reload('table-emp', {
+                    where: {
+                        //设定异步数据接口的额外参数，任意设
+                        //之后会把这个条件 直接带进去  相当于调用
+                        name: data.field.name,
+                        startDate: data.field.startDate,
+                        endDate: data.field.endDate
+                    }
+                    ,page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                }); //只重载数据
+
+                return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+            });
+
+            //监听操作列
+            table.on('tool(table-emp-filter)',function (obj){
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得lay-event对应的值(也可以是表头的event 参数对应的值)
+                if (layEvent=='del'){
+                    layer.confirm('您确认删除该员工'+data.name+'?', {icon:3,title:'删除确认'}, function (index) {
+                        //异步请求删除数据，结果提示，刷新表格
+                        var url = ctxPath + "emp/"+data.empId;
+                        var param = {
+                            _method:"DELETE"
+                        }
+                        $.post(url,param,function(response) {
+                            //成功提示
+                            if (response.code==0){
+                                layer.msg(response.message,{icon: 1,title:"操作结果"})
+                                refreshTable();
+                            }else {
+                                layer.alert(response.message,{icon:2,anim:6});
+                            }
+                        });
+                        layer.close(index);
+                    })
+                }else if(layEvent=='edit'){
+                    layer.open({
+                        type: 2,
+                        title: '编辑校友',
+                        area: ['100%','100%'],
+                        content: ctxPath+'emp/' + data.empId
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
