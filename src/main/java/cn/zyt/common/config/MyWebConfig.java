@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistration
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-//配置类 进行配置 比如说拦截器的配置等等
+//配置类 进行配置 比如说拦截器的配置等等 1
 @Configuration
 public class MyWebConfig implements WebMvcConfigurer
 {
