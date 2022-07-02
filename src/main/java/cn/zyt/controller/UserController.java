@@ -16,18 +16,15 @@ import javax.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/user")
-public class UserController
-{
+public class UserController {
     @Autowired
     UserService userService;
 
     @PostMapping("/login")
     public Result login(User param, @RequestParam("captcha") String captcha,
-                        HttpServletRequest request, HttpSession session)
-    {
+                        HttpServletRequest request, HttpSession session) {
         //验证码判断
-        if (!CaptchaUtil.ver(captcha,request))
-        {
+        if (!CaptchaUtil.ver(captcha, request)) {
             return Result.fail("验证码错误！");
         }
 
@@ -35,9 +32,8 @@ public class UserController
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         User user = userService.login(param);
         //记得match函数的参数顺序
-        if(user!=null && passwordEncoder.matches(param.getPassword(),user.getPassword()))
-        {
-            session.setAttribute("userInfo",user);
+        if (user != null && passwordEncoder.matches(param.getPassword(), user.getPassword())) {
+            session.setAttribute("userInfo", user);
             return Result.success("登录成功");
         }
         return Result.fail("用户名或密码错误");

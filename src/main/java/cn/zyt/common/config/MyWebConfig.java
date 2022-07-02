@@ -10,15 +10,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 //配置类 进行配置 比如说拦截器的配置等等 1
 @Configuration
-public class MyWebConfig implements WebMvcConfigurer
-{
+public class MyWebConfig implements WebMvcConfigurer {
     @Autowired
     @Qualifier(value = "loginInterceptor")
     private HandlerInterceptor handlerInterceptor;
 
     @Override
-    public void addInterceptors(InterceptorRegistry registry)
-    {
+    public void addInterceptors(InterceptorRegistry registry) {
         //在添加拦截器后 会返回一个拦截器的注册对象
         InterceptorRegistration interceptorRegistration =
                 registry.addInterceptor(handlerInterceptor);

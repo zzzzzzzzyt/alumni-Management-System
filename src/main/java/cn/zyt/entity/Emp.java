@@ -7,8 +7,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Data
-public class Emp implements Serializable
-{
+public class Emp implements Serializable {
     private Integer empId;
     private String name;
     private String sex;
