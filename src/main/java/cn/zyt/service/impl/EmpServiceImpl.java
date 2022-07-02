@@ -14,8 +14,7 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @Service
-public class EmpServiceImpl implements EmpService
-{
+public class EmpServiceImpl implements EmpService {
     @Resource
     EmpMapper empMapper;
 
@@ -23,44 +22,37 @@ public class EmpServiceImpl implements EmpService
     DeptMapper deptMapper;
 
     @Override
-    public List<Emp> getEmpList(EmpQuery param)
-    {
+    public List<Emp> getEmpList(EmpQuery param) {
         return empMapper.getEmpList(param);
     }
 
     @Override
-    public Long countEmpList(EmpQuery param)
-    {
+    public Long countEmpList(EmpQuery param) {
         return empMapper.countEmpList(param);
     }
 
     @Override
-    public void addEmp(Emp emp)
-    {
+    public void addEmp(Emp emp) {
         empMapper.addEmp(emp);
     }
 
     @Override
-    public List<Dept> getAllDept()
-    {
+    public List<Dept> getAllDept() {
         return deptMapper.getAllDept();
     }
 
     @Override
-    public void deleteEmpByIds(String ids)
-    {
+    public void deleteEmpByIds(String ids) {
         empMapper.deleteEmpByIds(ids);
     }
 
     @Override
-    public Emp getEmpById(Integer id)
-    {
+    public Emp getEmpById(Integer id) {
         return empMapper.getEmpById(id);
     }
 
     @Override
-    public void updateEmp(Emp emp)
-    {
+    public void updateEmp(Emp emp) {
         empMapper.updateEmp(emp);
     }
 }
