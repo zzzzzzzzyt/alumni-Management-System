@@ -1,18 +1,12 @@
 package cn.zyt;
 
-import org.apache.tomcat.util.security.MD5Encoder;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.util.DigestUtils;
-
-import java.nio.charset.StandardCharsets;
 
 
-public class CryptTest
-{
+public class CryptTest {
     @Test
-    public void test()
-    {
+    public void test() {
         //测试下md5加密
 
         /* 这个是spring提供的  加盐得自己处理
